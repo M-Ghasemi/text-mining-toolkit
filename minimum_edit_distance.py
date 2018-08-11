@@ -190,6 +190,21 @@ def pd_levenshtein_minimum_edit_distance(source: str, target: str) -> 'pandas.Da
 
 
 def print_minimum_distance(source, target):
+    """
+    Function for printing minimum edit distance between to strings. The costs
+    are calculated based on Levenshtein distance algorithm (delete:1, insert: 1,
+    substitute: 2).
+    Note that uppercase and lowercase characters are not equal, for example 'a'
+    and 'A' are not equal.
+
+    Example:
+        >>> source = 'playing'
+        >>> target = 'pray'
+        >>> print_minimum_distance(source, target)
+        Minimum distance: 5
+        ['p', 'l', 'a', 'y', 'i', 'n', 'g']
+        ['p', 'r', 'a', 'y', '*', '*', '*']
+    """
     m = len(source)
     n = len(target)
 
