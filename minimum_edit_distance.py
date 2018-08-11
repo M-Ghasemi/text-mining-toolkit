@@ -53,7 +53,7 @@ def np_levenshtein_minimum_edit_distance(source, target):
     Example:
         >>> source = 'minimum'
         >>> target = 'minimom'
-        >>> distance, backtrace = np_minimum_edit_distance(source, target)
+        >>> distance, backtrace = np_levenshtein_minimum_edit_distance(source, target)
         >>> print(distance)
         [[0. 1. 2. 3. 4. 5. 6. 7.]
          [1. 0. 1. 2. 3. 4. 5. 6.]
