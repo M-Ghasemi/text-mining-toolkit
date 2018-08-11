@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def get_levenshtein_delete_cost(x: str) -> int:
@@ -114,3 +115,81 @@ def np_levenshtein_minimum_edit_distance(source, target):
             backtrace_mat[i, j] = min_cost['state']
 
     return distance_mat, backtrace_mat
+
+
+def pd_levenshtein_minimum_edit_distance(source: str, target: str) -> 'pandas.DataFrame':
+
+    m = len(source)
+    n = len(target)
+
+    distance = pd.DataFrame(index=range(-1, m),
+                            columns=range(-1, n))
+
+    distance[-1][-1] = 0, 'stop'
+
+    for i in range(m):
+        distance[-1][i] = (
+            distance[-1][i - 1][0] + get_levenshtein_delete_cost(source[i]), 'up')
+
+    for j in range(n):
+        distance[j][-1] = (
+            distance[j - 1][-1][0] + get_levenshtein_insert_cost(target[j]), 'left')
+
+    for i in range(m):
+        for j in range(n):
+            possible_choices = [
+                {
+                    'state': 'diag',
+                    'cost': (distance[j - 1][i - 1][0] +
+                             get_levenshtein_substitute_cost(source[i], target[j])),
+                },
+                {
+                    'state': 'left',
+                    'cost': (distance[j - 1][i][0] +
+                             get_levenshtein_insert_cost(target[j]))
+                },
+                {
+                    'state': 'up',
+                    'cost': (distance[j][i - 1][0] +
+                             get_levenshtein_delete_cost(source[i]))
+                }
+            ]
+
+            min_cost = min(possible_choices, key=lambda x: x['cost'])
+            distance[j][i] = min_cost['cost'], min_cost['state']
+
+    return distance
+
+
+def print_minimum_distance(source, target):
+    m = len(source)
+    n = len(target)
+
+    src = []
+    dst = []
+    idx = m - 1
+    col = n - 1
+    distance = pd_levenshtein_minimum_edit_distance(source, target)
+
+    while not idx == col == -1:
+        direction = distance[col][idx][1]
+        if direction == 'diag':
+            src.append(source[idx])
+            dst.append(target[col])
+
+            idx -= 1
+            col -= 1
+        elif direction == 'left':
+            src.append('*')
+            dst.append(target[col])
+
+            col -= 1
+        else:
+            src.append(source[idx])
+            dst.append('*')
+            idx -= 1
+    src.reverse()
+    dst.reverse()
+    print(f'Minimum distance: {distance[n - 1][m - 1][0]}')
+    print(src)
+    print(dst)
