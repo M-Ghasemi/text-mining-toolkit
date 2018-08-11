@@ -1,17 +1,29 @@
 import numpy as np
 
 
-def get_levenshtein_delete_cost(x):
+def get_levenshtein_delete_cost(x: str) -> int:
+    """
+    The deletion cost of each character is 1.
+    """
     return len(x)
 
 
-def get_levenshtein_insert_cost(x):
+def get_levenshtein_insert_cost(x: str) -> int:
+    """
+    The insertion cost of each character is 1.
+    """
     return len(x)
 
 
-def get_levenshtein_substitute_cost(x, y):
+def get_levenshtein_substitute_cost(x: str, y: str) -> int:
+    """
+    The substitution cost of character `x` with  character y is 2.
+
+    Raises:
+        ValueError: If `x` or `y` are not of length of 1.
+    """
     if not len(x) == len(y) == 1:
-        raise Exception('substitution is supported for strings with length 1 only')
+        raise ValueError('substitution is supported for strings with length 1 only')
 
     if x == y:
         return 0
@@ -19,7 +31,7 @@ def get_levenshtein_substitute_cost(x, y):
     return 2
 
 
-def np_minimum_edit_distance(source, target):
+def np_levenshtein_minimum_edit_distance(source, target):
     """
     Function for computing minimum edit distance between to strings. The costs
     are calculated based on Levenshtein distance algorithm (delete:1, insert: 1,
@@ -35,8 +47,8 @@ def np_minimum_edit_distance(source, target):
         tuple: (distance_matrix, backtrace_matrix)
             distance_matrix: m * n numpy.array of minimum edit distance for two
                 strings source and target with lengths of m and n respectively.
-            path_matrix: m * n numpy.chararray for two strings source and target
-                with lengths of m and n respectively.
+            backtrace_matrix: m * n numpy.chararray for two strings source and
+                target with lengths of m and n respectively.
     Example:
         >>> source = 'minimum'
         >>> target = 'minimom'
@@ -65,14 +77,16 @@ def np_minimum_edit_distance(source, target):
     m = len(target)
 
     distance_mat = np.zeros((n + 1, m + 1))
-    path_mat = np.chararray((n + 1, m + 1), itemsize=4, unicode=True)
+    backtrace_mat = np.chararray((n + 1, m + 1), itemsize=4, unicode=True)
 
     distance_mat[0, 0] = 0
     for i in range(1, n + 1):
-        distance_mat[i, 0] = distance_mat[i - 1, 0] + get_levenshtein_delete_cost(source[i - 1])
+        distance_mat[i, 0] = (distance_mat[i - 1, 0] +
+                              get_levenshtein_delete_cost(source[i - 1]))
 
     for j in range(1, m + 1):
-        distance_mat[0, j] = distance_mat[0, j - 1] + get_levenshtein_insert_cost(target[j - 1])
+        distance_mat[0, j] = (distance_mat[0, j - 1] +
+                              get_levenshtein_insert_cost(target[j - 1]))
 
     for i in range(1, n + 1):
         for j in range(1, m + 1):
@@ -80,20 +94,23 @@ def np_minimum_edit_distance(source, target):
                 {
                     'state': 'diag',
                     'cost': (distance_mat[i - 1, j - 1] +
-                             get_levenshtein_substitute_cost(source[i - 1], target[j - 1])),
+                             get_levenshtein_substitute_cost(source[i - 1],
+                                                             target[j - 1])),
                 },
                 {
                     'state': 'up',
-                    'cost': distance_mat[i - 1, j] + get_levenshtein_delete_cost(source[i - 1]),
+                    'cost': (distance_mat[i - 1, j] +
+                             get_levenshtein_delete_cost(source[i - 1])),
                 },
                 {
                     'state': 'left',
-                    'cost': distance_mat[i, j - 1] + get_levenshtein_insert_cost(target[j - 1]),
+                    'cost': (distance_mat[i, j - 1] +
+                             get_levenshtein_insert_cost(target[j - 1])),
                 }
             ]
 
             min_cost = min(possible_choices, key=lambda x: x['cost'])
             distance_mat[i, j] = min_cost['cost']
-            path_mat[i, j] = min_cost['state']
+            backtrace_mat[i, j] = min_cost['state']
 
-    return distance_mat, path_mat
+    return distance_mat, backtrace_mat
