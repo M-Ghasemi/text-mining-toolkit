@@ -118,6 +118,34 @@ def np_levenshtein_minimum_edit_distance(source, target):
 
 
 def pd_levenshtein_minimum_edit_distance(source: str, target: str) -> 'pandas.DataFrame':
+    """
+    Function for computing minimum edit distance between to strings. The costs
+    are calculated based on Levenshtein distance algorithm (delete:1, insert: 1,
+    substitute: 2).
+    Note that uppercase and lowercase characters are not equal, for example 'a'
+    and 'A' are not equal.
+
+    Returns:
+        pandas.DataFrame: distance_matrix
+            distance_matrix: m * n pandas.DataFrame of minimum edit distance
+                for two strings source and target with lengths of m and n respectively.
+                Each cell of DataFram contains a tuple of the cost number and
+                also a string for backtrace.
+    Example:
+        >>> source = 'minimum'
+        >>> target = 'minimom'
+        >>> distance = pd_levenshtein_minimum_edit_distance(source, target)
+        >>> print(distance)
+                   -1          0          1          2          3          4          5          6
+        -1  (0, stop)  (1, left)  (2, left)  (3, left)  (4, left)  (5, left)  (6, left)  (7, left)
+         0    (1, up)  (0, diag)  (1, left)  (2, left)  (3, left)  (4, diag)  (5, left)  (6, diag)
+         1    (2, up)    (1, up)  (0, diag)  (1, left)  (2, diag)  (3, left)  (4, left)  (5, left)
+         2    (3, up)    (2, up)    (1, up)  (0, diag)  (1, left)  (2, left)  (3, left)  (4, left)
+         3    (4, up)    (3, up)  (2, diag)    (1, up)  (0, diag)  (1, left)  (2, left)  (3, left)
+         4    (5, up)  (4, diag)    (3, up)    (2, up)    (1, up)  (0, diag)  (1, left)  (2, diag)
+         5    (6, up)    (5, up)    (4, up)    (3, up)    (2, up)    (1, up)  (2, diag)  (3, diag)
+         6    (7, up)  (6, diag)    (5, up)    (4, up)    (3, up)  (2, diag)  (3, diag)  (2, diag)
+    """
 
     m = len(source)
     n = len(target)
